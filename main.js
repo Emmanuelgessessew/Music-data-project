@@ -1,17 +1,14 @@
 import { getUserIDs } from './data.mjs';
 
-const userSelect = document.getElementById('user-select');
+const userSelect = document.getElementById('users');
 
-function loadUsers() {
-    const userIDs =getUserIDs();
-
-    userIDs.forEach(id => {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = id;
-        userSelect.appendChild(option);
-    });
-}
+// Populate user dropdown
+getUserIDs().forEach(userId => {
+    const option = document.createElement('option');
+    option.value = userId;
+    option.textContent = userId;
+    usersSelect.appendChild(option);
+});
 
 loadUsers();
 
