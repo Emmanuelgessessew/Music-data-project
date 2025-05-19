@@ -1,4 +1,4 @@
-import { getUserIDs } from './data.mjs';
+import { getUserIDs, getListenEvents, getSong } from './data.mjs';
 
 const userSelect = document.getElementById('users');
 
@@ -10,31 +10,40 @@ getUserIDs().forEach(userId => {
     usersSelect.appendChild(option);
 });
 
-loadUsers();
 
-function getMostListenedSong(userId) {
-  const events = getListenEvents(userId);
-  const counts = {};
-  for (const event of events) {
-    if (!counts[event.songID]) {
-      counts[event.songID] = 0;
+usersSelect.addEventListener('change', () => {
+    const userId = usersSelect.value;
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+    
+    if (!userId) return;
+
+    const events = getListenEvents(userId);
+    if (events.length === 0) {
+        resultsDiv.textContent = 'This user didn’t listen to any songs.';
+        return;
     }
-    counts[event.songID]++;
-  }
 
-  let maxCount = 0;
-  let mostListenedSongId = null;
-  for (const songID in counts) {
-    if (counts[songID] > maxCount) {
-      maxCount = counts[songID];
-      mostListenedSongId = songID;
+    showQuestion1(events, resultsDiv);
+});
+
+function showQuestion1(events, container) {
+    const counts = {};
+    events.forEach(event => {
+        counts[event.songId] = (counts[event.songId] || 0) + 1;
+    });
+    
+    const maxCount = Math.max(...Object.values(counts));
+    const topSongs = Object.keys(counts)
+        .filter(songId => counts[songId] === maxCount)
+        .map(songId => getSong(songId));
+    
+    if (topSongs.length > 0) {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <h2>Most Listened Song</h2>
+            <p>${topSongs.map(song => `${song.artist} - ${song.title}`).join(', ')}</p>
+        `;
+        container.appendChild(div);
     }
-  }
-
-  if (mostListenedSongId) {
-    const song = getSong(mostListenedSongId);
-    return song.title + ' - ' + song.artist;
-  }
-
-  return null;
 }
